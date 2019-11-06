@@ -109,6 +109,9 @@ pushd toolchain/src/gcc-$gcc
         autoconf                                    || exit 1
     popd
 
+
+    mkdir -p $PREFIX/$TARGET/include
+
     pushd $PREFIX/$TARGET/include
         patch -p1 < $PATCH/gcc-headers.patch        || exit 1
     popd
