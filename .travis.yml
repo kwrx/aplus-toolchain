@@ -1,0 +1,40 @@
+language: c
+
+matrix:
+  include:
+    - os: linux
+      env:
+        - HOST="x86_64"
+    - os: linux
+      env:
+        - HOST="i686"
+
+script:
+  ci/build.sh ${HOST}
+
+install:
+  ci/install.sh
+
+
+
+before_deploy:
+  - git config --local user.name "Antonino Natale"
+  - git config --local user.email "antonio.natale97@hotmail.com"
+  - export TRAVIS_TAG=v0.6.$(date +'%Y%m%d')
+  - git tag $TRAVIS_TAG
+
+deploy:
+  provider: releases
+  api_key:
+    secure: YS5y6Lfql3CmmmF7MC6g96HzbrSKe30KiJ/PYA5bG0xhNkRDxjfIK0mmAkn1zyTyYDO6n02LNlCnvvih2fnjy3mM/Ob3/rulVxlosdo0CmcZX91Geb7vIGw0Vtwyd7GBbz20veHGRQP7u+wsvJqcrNUwQT/RmHcLV3yOoYlg1gVQ7xKqOlL1WEB2wRkx+fJZt/BbII1G7BRiNfTHXJ9bNt/cgZRSAHT3QfvLpv2ESliCKEyE/JTHXr1Vdhk6qvwysammKHoyS2qlAl+FPdBqgkMPMMN2wnd7CM96H5VpkZTMEnd+DeTEaDO0yAlfmKkWO4vWcStqNT8hXD5Yy4Bhzexzvj8ZvQxEERal6lZIGpytxofDSFZXmSwXje7806GVbgLmowcMxjImSSjQjKUGoy6p2jQSZxt4qWV2GLe5uEd3sLGs221gK9wuW4A8CpoMsit67gEmp/r7ypc6xMun/yCUU9bmSKayge+iG/cqT0SeWA6nxqXGNwa9/LWErhbEsTfFWNL+2H8ZMh4/2N5DV48o8V139XQLk+BmUr1AV/3e7hT3SwrrCN1VMoArNSb2D5aMl+ghxKErFLebDo3Wno/EPJC0aIL9hJ3rsLcPMyZLil0gEy9A+j8/Si1vy0RrPnJ/gPJfsXdFFBkMBsfVdZmftkO9GZbXfDiFpqjT71M=
+    
+  file:
+    ${HOST}-aplus-toolchain-nocxx.tar.xz
+
+  skip_cleanup: true
+  overwrite: true
+  draft: false
+
+  on:
+    repo: kwrx/aplus-toolchain
+    tags: false
