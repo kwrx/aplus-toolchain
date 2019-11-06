@@ -18,7 +18,7 @@ PATCH=$(pwd)/patch
 PREFIX=$(pwd)/toolchain
 TARGET=$host-aplus
 
-export PATH="$PATH:$PREFIX/bin:$PREFIX/tmp/bin"
+export PATH="$PREFIX/bin:$PREFIX/tmp/bin:$PATH"
 
 
 
