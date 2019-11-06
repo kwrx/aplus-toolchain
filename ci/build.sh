@@ -14,7 +14,7 @@ mkdir -p toolchain/tmp
 
 
 
-$PATCH=$(pwd)/patch
+PATCH=$(pwd)/patch
 PREFIX=$(pwd)/toolchain
 TARGET=$host-aplus
 
