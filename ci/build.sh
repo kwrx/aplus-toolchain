@@ -98,7 +98,7 @@ pushd toolchain/src/autoconf-$autoconf_gcc
 popd
 
 # GCC
-pushd toolchain/src/gcc
+pushd toolchain/src/gcc-$gcc
 
     mkdir -p build
 
