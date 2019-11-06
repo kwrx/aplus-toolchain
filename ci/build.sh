@@ -9,42 +9,43 @@ automake="1.15.1"
 
 
 mkdir -p toolchain
-mkdir -p toolchain/src
-mkdir -p toolchain/tmp
+mkdir -p tmp
+mkdir -p tmp/src
 
 
 
 PATCH=$(pwd)/patch
 PREFIX=$(pwd)/toolchain
+TEMP=$(pwd)/tmp
 TARGET=$host-aplus
 
-export PATH="$PREFIX/bin:$PREFIX/tmp/bin:$PATH"
+export PATH="$PREFIX/bin:$TEMP/bin:$PATH"
 
 
 
 # Download sources
-wget -P toolchain/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf.tar.xz                    || exit 1
-wget -P toolchain/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz                || exit 1
-wget -P toolchain/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
-wget -P toolchain/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
-wget -P toolchain/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
+wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf.tar.xz                    || exit 1
+wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz                || exit 1
+wget -P tmp/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
+wget -P tmp/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
+wget -P tmp/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
 
 
 # Extract
-tar -xJf toolchain/src/autoconf-$autoconf.tar.xz -C toolchain/src                 || exit 1
-tar -xJf toolchain/src/autoconf-$autoconf_gcc.tar.xz -C toolchain/src             || exit 1
-tar -xJf toolchain/src/automake-$automake.tar.xz -C toolchain/src                 || exit 1
-tar -xJf toolchain/src/binutils-$binutils.tar.xz -C toolchain/src                 || exit 1
-tar -xJf toolchain/src/gcc-$gcc.tar.xz -C toolchain/src                           || exit 1
+tar -xJf tmp/src/autoconf-$autoconf.tar.xz -C tmp/src                 || exit 1
+tar -xJf tmp/src/autoconf-$autoconf_gcc.tar.xz -C tmp/src             || exit 1
+tar -xJf tmp/src/automake-$automake.tar.xz -C tmp/src                 || exit 1
+tar -xJf tmp/src/binutils-$binutils.tar.xz -C tmp/src                 || exit 1
+tar -xJf tmp/src/gcc-$gcc.tar.xz -C tmp/src                           || exit 1
 
 
 # Autoconf
-pushd toolchain/src/autoconf-$autoconf
+pushd tmp/src/autoconf-$autoconf
 
     mkdir -p build
 
     pushd build
-        ../configure --prefix=$PREFIX/tmp           || exit 1
+        ../configure --prefix=$TEMP                 || exit 1
         make                                        || exit 1
         make install                                || exit 1
     popd
@@ -52,12 +53,12 @@ pushd toolchain/src/autoconf-$autoconf
 popd
 
 # Automake
-pushd toolchain/src/automake-$automake
+pushd tmp/src/automake-$automake
 
     mkdir -p build
     
     pushd build
-        ../configure --prefix=$PREFIX/tmp           || exit 1
+        ../configure --prefix=$TEMP                 || exit 1
         make                                        || exit 1
         make install                                || exit 1
     popd
@@ -65,7 +66,7 @@ pushd toolchain/src/automake-$automake
 popd
 
 # Binutils
-pushd toolchain/src/binutils-$binutils
+pushd tmp/src/binutils-$binutils
 
     mkdir -p build
 
@@ -85,12 +86,12 @@ pushd toolchain/src/binutils-$binutils
 popd
 
 # Autoconf (GCC)
-pushd toolchain/src/autoconf-$autoconf_gcc
+pushd tmp/src/autoconf-$autoconf_gcc
 
     mkdir -p build
     
     pushd build
-        ../configure --prefix=$PREFIX/tmp           || exit 1
+        ../configure --prefix=$TEMP                 || exit 1
         make                                        || exit 1
         make install                                || exit 1
     popd    
@@ -98,7 +99,7 @@ pushd toolchain/src/autoconf-$autoconf_gcc
 popd
 
 # GCC
-pushd toolchain/src/gcc-$gcc
+pushd tmp/src/gcc-$gcc
 
     mkdir -p build
 
@@ -128,6 +129,7 @@ pushd toolchain/src/gcc-$gcc
 popd
 
 
+# Strip binaries
 pushd $PREFIX/bin
     strip *
 popd
@@ -140,11 +142,34 @@ pushd $PREFIX/libexec/gcc/$TARGET/$gcc
     strip cc1 cc1plus collect2 lto-wrapper lto1
 popd
 
+# Pack Release
 pushd toolchain
-    rm -rf tmp
-    rm -rf src
     rm -rf $PREFIX/$TARGET/include/*
     tar -cJf $TARGET-toolchain-nocxx.tar.xz *
 popd
 
 mv toolchain/$TARGET-toolchain-nocxx.tar.xz .
+
+
+
+# Install newlib
+wget -P tmp/src https://github.com/kwrx/aplus-newlib/releases/latest/download/$TARGET-newlib.tar.xz || exit 1
+tar -xJf tmp/src/$TARGET-newlib.tar.xz -C $PREFIX                                                   || exit 1
+
+# Libstdc++-v3
+pushd tmp/src/gcc-$gcc
+    pushd build
+        make all-target-libstdc++-v3                                                                || exit 1
+        make install-target-libstdc++-v3                                                            || exit 1
+    popd
+popd
+
+# Pack Release
+pushd toolchain
+    tar -cJf $TARGET-toolchain.tar.xz *
+popd
+
+mv toolchain/$TARGET-toolchain.tar.xz .
+
+# Clean
+rm -rf $TEMP

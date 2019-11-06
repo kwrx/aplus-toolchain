@@ -39,7 +39,8 @@ deploy:
     secure: KTxBAatSYAs0iipnwiQ2Ej0hj+ef5O6v7kF3Cxq04yMbMtswyskksaSNBn8vSYdN7PLiPTkFDgF8XTfns5xpzjy8hglB6A/UQu205wpiUMfyX7jSZohjwSTlcJJxJ33abDetZyDldo0ZQT+YoToGiU+yGRetfCVd3vddWQ2bER4A5qzOMS/NXp8nc0xOZYKnmPEl4KCptWlKkgLWqxMjDanDOH6aAlW87A+T3ElOkAeENS6C+6XW08LC/jEp0E8B9LjWcK5kArVygr1/ASFDmsIPOl2qTDQVmJXM0mUaTq3qooNH6bKgm83A7xbptyN/IEHh1LsJEbAA0Ywx32pv6Lea0qD9BRjwFbObzqf8L6KzKdY9zGl8AiXUQ7lbvndQZI78RgtYX7DLtoLn2i8dytv3v7OeptSNwkjBqVATyR6wodKF58B0TvjmSjNTJuqqzvxgeRVDnm5E92Vk98KgVUtEQyopmAKcq+7RYTAALNeybjiTx7b68vPOEV47bsyRmbY8w+A620wD+UG3NYaXkmkL57Ets46v62rxdgScret3Yc2FFdD/YeOqILpP+NxRvXPMBQWZbp5W1T6uhvwdgrQVupzUWwlfKKbWG4l61XQNuA8ZUZxbz8j4B92usHpru+XFZO7R8ti42ZzIAbGJ4yAchJda1yopAfbqDBYr4pg=
     
   file:
-    ${HOST}-aplus-toolchain-nocxx.tar.xz
+    - ${HOST}-aplus-toolchain-nocxx.tar.xz
+    - ${HOST}-aplus-toolchain.tar.xz
 
   skip_cleanup: true
   overwrite: true
