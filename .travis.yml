@@ -1,4 +1,5 @@
 language: c
+dist: bionic
 
 matrix:
   include:
@@ -15,7 +16,16 @@ script:
 install:
   ci/install.sh
 
-
+addons:
+  apt:
+    packages:
+    - libgmp3-dev
+    - libmpc-dev
+    - libmpfr-dev
+    - libisl-dev
+    - texinfo
+    - bison
+    - flex
 
 before_deploy:
   - git config --local user.name "Antonino Natale"

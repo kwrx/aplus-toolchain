@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt install -y --no-install-recommends \
+sudo apt install -y --no-install-recommends \
     libgmp3-dev     \
     libmpc-dev      \
     libmpfr-dev     \
