@@ -146,3 +146,5 @@ pushd toolchain
     rm -rf $PREFIX/$TARGET/include/*
     tar -cJf $TARGET-toolchain-nocxx.tar.xz *
 popd
+
+mv toolchain/$TARGET-toolchain-nocxx.tar.xz .
