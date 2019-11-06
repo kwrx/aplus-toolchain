@@ -116,10 +116,6 @@ pushd toolchain/src/gcc-$gcc
         patch -p1 < $PATCH/gcc-headers.patch        || exit 1
     popd
 
-    
-    # Dependencies (mpfr, mpc, isl)
-    ./contrib/download_prerequisites                || exit 1
-
 
     pushd build
         ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --disable-nls   || exit 1
