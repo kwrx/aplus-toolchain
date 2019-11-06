@@ -31,11 +31,11 @@ wget -P toolchain/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/
 
 
 # Extract
-tar -xJf autoconf-$autoconf.tar.xz -C toolchain/src                 || exit 1
-tar -xJf autoconf-$autoconf_gcc.tar.xz -C toolchain/src             || exit 1
-tar -xJf automake-$automake.tar.xz -C toolchain/src                 || exit 1
-tar -xJf binutils-$binutils.tar.xz -C toolchain/src                 || exit 1
-tar -xJf gcc-$gcc.tar.xz -C toolchain/src                           || exit 1
+tar -xJf toolchain/src/autoconf-$autoconf.tar.xz -C toolchain/src                 || exit 1
+tar -xJf toolchain/src/autoconf-$autoconf_gcc.tar.xz -C toolchain/src             || exit 1
+tar -xJf toolchain/src/automake-$automake.tar.xz -C toolchain/src                 || exit 1
+tar -xJf toolchain/src/binutils-$binutils.tar.xz -C toolchain/src                 || exit 1
+tar -xJf toolchain/src/gcc-$gcc.tar.xz -C toolchain/src                           || exit 1
 
 
 # Autoconf
