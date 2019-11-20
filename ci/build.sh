@@ -6,7 +6,6 @@ gcc="8.2.0"
 autoconf="2.69"
 autoconf_gcc="2.64"
 automake="1.15.1"
-premake="5.0.0-alpha14"
 
 
 mkdir -p toolchain
@@ -30,7 +29,7 @@ wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz  
 wget -P tmp/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
 wget -P tmp/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
 wget -P tmp/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
-git clone --depth=1 https://github.com/kwrx/premake-core                                      || exit 1
+git clone --depth=1 https://github.com/kwrx/premake-core tmp/src/premake-core                 || exit 1
 
 # Extract
 tar -xJf tmp/src/autoconf-$autoconf.tar.xz -C tmp/src                 || exit 1
