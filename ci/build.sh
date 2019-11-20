@@ -30,7 +30,7 @@ wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz  
 wget -P tmp/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
 wget -P tmp/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
 wget -P tmp/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
-wget -P tmp/src https://github.com/premake/premake-core/releases/download/v$premake/premake-$premake-linux.tar.gz || exit 1
+git clone --depth=1 git@github.com:kwrx/premake-core.git                                      || exit 1
 
 # Extract
 tar -xJf tmp/src/autoconf-$autoconf.tar.xz -C tmp/src                 || exit 1
@@ -38,7 +38,6 @@ tar -xJf tmp/src/autoconf-$autoconf_gcc.tar.xz -C tmp/src             || exit 1
 tar -xJf tmp/src/automake-$automake.tar.xz -C tmp/src                 || exit 1
 tar -xJf tmp/src/binutils-$binutils.tar.xz -C tmp/src                 || exit 1
 tar -xJf tmp/src/gcc-$gcc.tar.xz -C tmp/src                           || exit 1
-tar -xzf tmp/src/premake-$premake-linux.tar.gz -C tmp/src             || exit 1
 
 
 
@@ -133,8 +132,13 @@ popd
 
 
 # Premake
-pushd tmp/src
-    install -D -s premake5 $PREFIX/bin
+pushd tmp/src/premake-core
+    make -f Bootstrap.mak linux                                                                 || exit 1
+    bin/release/premake5 embed
+
+    pushd bin/release
+        install -D -s premake5 $PREFIX/bin
+    popd
 popd
 
 
