@@ -30,7 +30,7 @@ wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz  
 wget -P tmp/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
 wget -P tmp/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
 wget -P tmp/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
-wget -P tmp/src https://github.com/premake/premake-core/releases/download/v5.0.0-alpha14/premake-$premake-linux.tar.gz || exit 1
+wget -P tmp/src https://github.com/premake/premake-core/releases/download/v$premake/premake-$premake-linux.tar.gz || exit 1
 
 # Extract
 tar -xJf tmp/src/autoconf-$autoconf.tar.xz -C tmp/src                 || exit 1
