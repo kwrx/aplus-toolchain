@@ -46,8 +46,8 @@ pushd tmp/src/autoconf-$autoconf
 
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make                                        || exit 1
-        make install                                || exit 1
+        make -j2                                    || exit 1
+        make -j2 install                            || exit 1
     popd
 
 popd
@@ -59,8 +59,8 @@ pushd tmp/src/automake-$automake
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make                                        || exit 1
-        make install                                || exit 1
+        make -j2                                    || exit 1
+        make -j2 install                            || exit 1
     popd
 
 popd
@@ -79,8 +79,8 @@ pushd tmp/src/binutils-$binutils
 
     pushd build
         ../configure --prefix=$PREFIX --target=$TARGET      || exit 1
-        make                                                || exit 1
-        make install                                        || exit 1
+        make -j2                                            || exit 1
+        make -j2 install                                    || exit 1
     popd
 
 popd
@@ -92,8 +92,8 @@ pushd tmp/src/autoconf-$autoconf_gcc
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make                                        || exit 1
-        make install                                || exit 1
+        make -j2                                    || exit 1
+        make -j2 install                            || exit 1
     popd    
 
 popd
@@ -120,10 +120,10 @@ pushd tmp/src/gcc-$gcc
 
     pushd build
         ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --disable-nls   || exit 1
-        make all-gcc                                                                            || exit 1
-        make all-target-libgcc                                                                  || exit 1
-        make install-gcc                                                                        || exit 1
-        make install-target-libgcc                                                              || exit 1
+        make -j2 all-gcc                                                                        || exit 1
+        make -j2 all-target-libgcc                                                              || exit 1
+        make -j2 install-gcc                                                                    || exit 1
+        make -j2 install-target-libgcc                                                          || exit 1
     popd
 
 popd
@@ -159,8 +159,8 @@ tar -xJf tmp/src/$TARGET-newlib.tar.xz -C $PREFIX                               
 # Libstdc++-v3
 pushd tmp/src/gcc-$gcc
     pushd build
-        make all-target-libstdc++-v3                                                                || exit 1
-        make install-target-libstdc++-v3                                                            || exit 1
+        make -j2 all-target-libstdc++-v3                                                            || exit 1
+        make -j2 install-target-libstdc++-v3                                                        || exit 1
     popd
 popd
 
