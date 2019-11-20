@@ -42,11 +42,6 @@ tar -xzf tmp/src/premake-$premake-linux.tar.gz -C tmp/src             || exit 1
 
 
 
-# Premake
-pushd tmp/src
-    install -D -s premake5 $PREFIX/bin
-popd
-
 # Autoconf
 pushd tmp/src/autoconf-$autoconf
 
@@ -134,6 +129,12 @@ pushd tmp/src/gcc-$gcc
         make -j2 install-target-libgcc                                                          || exit 1
     popd
 
+popd
+
+
+# Premake
+pushd tmp/src
+    install -D -s premake5 $PREFIX/bin
 popd
 
 
