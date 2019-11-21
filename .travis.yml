@@ -1,7 +1,8 @@
-language: c
+language: generic
+os: linux
 dist: bionic
 
-matrix:
+jobs:
   include:
     - os: linux
       env:
@@ -35,16 +36,17 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key:
+  token:
     "$GH_TOKEN"
 
   file:
     - ${HOST}-aplus-toolchain-nocxx.tar.xz
     - ${HOST}-aplus-toolchain.tar.xz
 
-  skip_cleanup: true
   overwrite: true
   draft: false
+  file_glob: true
+  edge: true
 
   on:
     repo: kwrx/aplus-toolchain
