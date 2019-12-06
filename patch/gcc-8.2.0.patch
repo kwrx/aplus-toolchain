@@ -21,6 +21,13 @@ diff -Naur gcc-8.2.0/fixincludes/mkfixinc.sh aplus-gcc-8.2.0/fixincludes/mkfixin
      i?86-*-cygwin* | \
      i?86-*-mingw32* | \
      x86_64-*-mingw32* | \
+diff -Naur gcc-8.2.0/gcc/config/i386/aplus64 aplus-gcc-8.2.0/gcc/config/i386/aplus64
+--- gcc-8.2.0/gcc/config/i386/aplus64	1970-01-01 01:00:00.000000000 +0100
++++ aplus-gcc-8.2.0/gcc/config/i386/aplus64	2018-11-26 19:34:56.594083088 +0100
+@@ -0,0 +1,4 @@
++MULTILIB_OPTIONS += -mno-red-zone
++MULTILIB_DIRNAMES += no-red-zone
++
 diff -Naur gcc-8.2.0/gcc/config/aplus.h aplus-gcc-8.2.0/gcc/config/aplus.h
 --- gcc-8.2.0/gcc/config/aplus.h	1970-01-01 01:00:00.000000000 +0100
 +++ aplus-gcc-8.2.0/gcc/config/aplus.h	2018-11-26 19:34:56.594083088 +0100
@@ -62,7 +69,7 @@ diff -Naur gcc-8.2.0/gcc/config/aplus.h aplus-gcc-8.2.0/gcc/config/aplus.h
 diff -Naur gcc-8.2.0/gcc/config.gcc aplus-gcc-8.2.0/gcc/config.gcc
 --- gcc-8.2.0/gcc/config.gcc	2018-06-25 21:34:01.000000000 +0200
 +++ aplus-gcc-8.2.0/gcc/config.gcc	2018-11-26 19:34:56.597416421 +0100
-@@ -646,6 +646,11 @@
+@@ -646,6 +646,12 @@
  
  # Common parts for widely ported systems.
  case ${target} in
@@ -82,6 +89,7 @@ diff -Naur gcc-8.2.0/gcc/config.gcc aplus-gcc-8.2.0/gcc/config.gcc
 +    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h aplus.h"
 +    ;;
 +x86_64-*-aplus*)
++    tmake_file="${tmake_file} i386/aplus64"
 +    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h aplus.h"
 +    ;;
  aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
