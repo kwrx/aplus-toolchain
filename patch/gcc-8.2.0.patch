@@ -25,7 +25,7 @@ diff -Naur gcc-8.2.0/gcc/config/i386/aplus64 aplus-gcc-8.2.0/gcc/config/i386/apl
 --- gcc-8.2.0/gcc/config/i386/aplus64	1970-01-01 01:00:00.000000000 +0100
 +++ aplus-gcc-8.2.0/gcc/config/i386/aplus64	2018-11-26 19:34:56.594083088 +0100
 @@ -0,0 +1,3 @@
-+MULTILIB_OPTIONS += -mno-red-zone
++MULTILIB_OPTIONS += mno-red-zone
 +MULTILIB_DIRNAMES += no-red-zone
 +
 diff -Naur gcc-8.2.0/gcc/config/aplus.h aplus-gcc-8.2.0/gcc/config/aplus.h
