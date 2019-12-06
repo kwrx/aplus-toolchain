@@ -31,7 +31,7 @@ addons:
 before_deploy:
   - git config --local user.name "Antonino Natale"
   - git config --local user.email "antonio.natale97@hotmail.com"
-  - export TRAVIS_TAG=v0.6.$(date +'%s')
+  - export TRAVIS_TAG=v0.6.$(git rev-parse --short HEAD)
   - git tag $TRAVIS_TAG
 
 deploy:
