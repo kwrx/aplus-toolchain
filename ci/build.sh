@@ -119,7 +119,7 @@ pushd tmp/src/gcc-$gcc
 
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-multilib   || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++                     || exit 1
         make -j2 all-gcc                                                                            || exit 1
         make -j2 all-target-libgcc                                                                  || exit 1
         make -j2 install-gcc                                                                        || exit 1
