@@ -129,6 +129,7 @@ pushd tmp/src/gcc-$gcc
 popd
 
 
+
 # Strip binaries
 pushd $PREFIX/bin
     strip *
