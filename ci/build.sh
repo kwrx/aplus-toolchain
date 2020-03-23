@@ -153,9 +153,9 @@ mv toolchain/$TARGET-toolchain-nocxx.tar.xz .
 
 
 
-# Install newlib
-wget -P tmp/src https://github.com/kwrx/aplus-newlib/releases/latest/download/$TARGET-newlib.tar.xz || exit 1
-tar -xJf tmp/src/$TARGET-newlib.tar.xz -C $PREFIX                                                   || exit 1
+# Install musl
+wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TARGET-musl.tar.xz     || exit 1
+tar -xJf tmp/src/$TARGET-musl.tar.xz -C $PREFIX                                                     || exit 1
 
 # Libstdc++-v3
 pushd tmp/src/gcc-$gcc
