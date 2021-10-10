@@ -2,7 +2,7 @@
 
 host=$1
 binutils="2.31"
-gcc="8.2.0"
+gcc="8.5.0"
 autoconf="2.69"
 autoconf_gcc="2.64"
 automake="1.15.1"
@@ -28,7 +28,7 @@ wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf.tar.xz      
 wget -P tmp/src https://ftp.gnu.org/gnu/autoconf/autoconf-$autoconf_gcc.tar.xz                || exit 1
 wget -P tmp/src https://ftp.gnu.org/gnu/automake/automake-$automake.tar.xz                    || exit 1
 wget -P tmp/src http://ftp.gnu.org/gnu/binutils/binutils-$binutils.tar.xz                     || exit 1
-wget -P tmp/src http://mirror2.mirror.garr.it/mirrors/gnuftp/gcc/gcc-$gcc/gcc-$gcc.tar.xz     || exit 1
+wget -P tmp/src https://ftp.gnu.org/gnu/gcc/gcc-$gcc/gcc-$gcc.tar.xz                          || exit 1
 
 # Extract
 tar -xJf tmp/src/autoconf-$autoconf.tar.xz -C tmp/src                 || exit 1
@@ -46,8 +46,8 @@ pushd tmp/src/autoconf-$autoconf
 
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j2                                    || exit 1
-        make -j2 install                            || exit 1
+        make -j4                                    || exit 1
+        make -j4 install                            || exit 1
     popd
 
 popd
@@ -59,8 +59,8 @@ pushd tmp/src/automake-$automake
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j2                                    || exit 1
-        make -j2 install                            || exit 1
+        make -j4                                    || exit 1
+        make -j4 install                            || exit 1
     popd
 
 popd
@@ -71,16 +71,16 @@ pushd tmp/src/binutils-$binutils
     mkdir -p build
 
     # Patch
-    patch -p1 < $PATCH/binutils-$binutils.patch             || exit 1
+    patch -p1 < $PATCH/binutils-$binutils.patch     || exit 1
 
     pushd ld
-        automake                                            || exit 1
+        automake                                    || exit 1
     popd
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET      || exit 1
-        make -j2                                            || exit 1
-        make -j2 install                                    || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET --enable-lto --disable-host-shared   || exit 1
+        make -j4                                                                            || exit 1
+        make -j4 install                                                                    || exit 1
     popd
 
 popd
@@ -92,8 +92,8 @@ pushd tmp/src/autoconf-$autoconf_gcc
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j2                                    || exit 1
-        make -j2 install                            || exit 1
+        make -j4                                    || exit 1
+        make -j4 install                            || exit 1
     popd    
 
 popd
@@ -119,11 +119,11 @@ pushd tmp/src/gcc-$gcc
 
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++                     || exit 1
-        make -j2 all-gcc                                                                            || exit 1
-        make -j2 all-target-libgcc                                                                  || exit 1
-        make -j2 install-gcc                                                                        || exit 1
-        make -j2 install-target-libgcc                                                              || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared   || exit 1
+        make -j4 all-gcc                                                                                             || exit 1
+        make -j4 all-target-libgcc                                                                                   || exit 1
+        make -j4 install-gcc                                                                                         || exit 1
+        make -j4 install-target-libgcc                                                                               || exit 1
     popd
 
 popd
@@ -160,8 +160,8 @@ tar -xJf tmp/src/$TARGET-musl.tar.xz -C $PREFIX                                 
 # Libstdc++-v3
 pushd tmp/src/gcc-$gcc
     pushd build
-        make -j2 all-target-libstdc++-v3                                                            || exit 1
-        make -j2 install-target-libstdc++-v3                                                        || exit 1
+        make -j4 all-target-libstdc++-v3                                                            || exit 1
+        make -j4 install-target-libstdc++-v3                                                        || exit 1
     popd
 popd
 

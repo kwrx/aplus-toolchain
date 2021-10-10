@@ -1,0 +1,445 @@
+diff -Naur gcc-8.2.0/config.sub aplus-gcc-8.2.0/config.sub
+--- gcc-8.2.0/config.sub	2018-01-03 05:25:18.000000000 +0100
++++ aplus-gcc-8.2.0/config.sub	2018-11-26 19:34:56.594083088 +0100
+@@ -1390,7 +1390,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \
+diff -Naur gcc-8.2.0/fixincludes/mkfixinc.sh aplus-gcc-8.2.0/fixincludes/mkfixinc.sh
+--- gcc-8.2.0/fixincludes/mkfixinc.sh	2016-06-21 23:57:20.000000000 +0200
++++ aplus-gcc-8.2.0/fixincludes/mkfixinc.sh	2018-11-26 19:34:56.594083088 +0100
+@@ -11,6 +11,7 @@
+ 
+ # Check for special fix rules for particular targets
+ case $machine in
++    *-aplus* | \
+     i?86-*-cygwin* | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+diff -Naur gcc-8.2.0/gcc/config/i386/aplus64 aplus-gcc-8.2.0/gcc/config/i386/aplus64
+--- gcc-8.2.0/gcc/config/i386/aplus64	1970-01-01 01:00:00.000000000 +0100
++++ aplus-gcc-8.2.0/gcc/config/i386/aplus64	2018-11-26 19:34:56.594083088 +0100
+@@ -0,0 +1,3 @@
++MULTILIB_OPTIONS += mno-red-zone
++MULTILIB_DIRNAMES += no-red-zone
++
+diff -Naur gcc-8.2.0/gcc/config/aplus.h aplus-gcc-8.2.0/gcc/config/aplus.h
+--- gcc-8.2.0/gcc/config/aplus.h	1970-01-01 01:00:00.000000000 +0100
++++ aplus-gcc-8.2.0/gcc/config/aplus.h	2018-11-26 19:34:56.594083088 +0100
+@@ -0,0 +1,34 @@
++#undef TARGET_APLUS
++#define TARGET_APLUS            1
++
++#ifdef LIB_SPEC
++#undef LIB_SPEC
++#endif
++
++#ifdef STARTFILE_SPEC
++#undef STARTFILE_SPEC
++#endif
++
++#ifdef ENDFILE_SPEC
++#undef ENDFILE_SPEC
++#endif
++
++
++#define LIB_SPEC                "-lc -lm -lgcc"
++#define STARTFILE_SPEC          "crt0.o%s crti.o%s crtbegin.o%s"
++#define ENDFILE_SPEC            "crtend.o%s crtn.o%s"
++
++#undef NO_IMPLICIT_EXTERN_C
++#define NO_IMPLICIT_EXTERN_C    1
++
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()        \
++    do {                                \
++        builtin_define("__aplus__");    \
++        builtin_define("__APLUS__");    \
++        builtin_define("__unix__");     \
++        builtin_assert("system=aplus"); \
++        builtin_assert("system=unix");  \
++        builtin_assert("system=posix"); \
++    } while(0);
++
+diff -Naur gcc-8.2.0/gcc/config.gcc aplus-gcc-8.2.0/gcc/config.gcc
+--- gcc-8.2.0/gcc/config.gcc	2018-06-25 21:34:01.000000000 +0200
++++ aplus-gcc-8.2.0/gcc/config.gcc	2018-11-26 19:34:56.597416421 +0100
+@@ -646,6 +646,11 @@
+ 
+ # Common parts for widely ported systems.
+ case ${target} in
++*-*-aplus*)
++  gas=yes
++  gnu_ld=yes
++  default_use_cxa_atexit=yes
++  ;;
+ *-*-darwin*)
+   tmake_file="t-darwin ${cpu_type}/t-darwin"
+   tm_file="${tm_file} darwin.h"
+@@ -938,6 +943,13 @@
+ esac
+ 
+ case ${target} in
++i[34567]86-*-aplus*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h aplus.h"
++    ;;
++x86_64-*-aplus*)
++    tmake_file="${tmake_file} i386/aplus64"
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h newlib-stdint.h i386/i386elf.h i386/x86-64.h aplus.h"
++    ;;
+ aarch64*-*-elf | aarch64*-*-fuchsia* | aarch64*-*-rtems*)
+ 	tm_file="${tm_file} dbxelf.h elfos.h newlib-stdint.h"
+ 	tm_file="${tm_file} aarch64/aarch64-elf.h aarch64/aarch64-elf-raw.h"
+diff -Naur gcc-8.2.0/libgcc/config.host aplus-gcc-8.2.0/libgcc/config.host
+--- gcc-8.2.0/libgcc/config.host	2018-04-06 22:04:17.000000000 +0200
++++ aplus-gcc-8.2.0/libgcc/config.host	2018-11-26 19:34:56.600749755 +0100
+@@ -333,6 +333,14 @@
+ esac
+ 
+ case ${host} in
++i[34567]86-*-aplus*)
++    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++    ;;
++x86_64-*-aplus*)
++    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++    ;;
+ aarch64*-*-elf | aarch64*-*-rtems*)
+ 	extra_parts="$extra_parts crtbegin.o crtend.o crti.o crtn.o"
+ 	extra_parts="$extra_parts crtfastmath.o"
+diff -Naur gcc-8.2.0/libstdc++-v3/crossconfig.m4 aplus-gcc-8.2.0/libstdc++-v3/crossconfig.m4
+--- gcc-8.2.0/libstdc++-v3/crossconfig.m4	2018-07-04 13:45:51.000000000 +0200
++++ aplus-gcc-8.2.0/libstdc++-v3/crossconfig.m4	2018-11-26 19:34:56.600749755 +0100
+@@ -5,6 +5,12 @@
+ AC_DEFUN([GLIBCXX_CROSSCONFIG],[
+ # Base decisions on target environment.
+ case "${host}" in
++  *-aplus*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
+   arm*-*-symbianelf*)
+     # This is a freestanding configuration; there is nothing to do here.
+     ;;
+diff -Naur gcc-8.2.0/libstdc++-v3/crossconfig.m4.orig aplus-gcc-8.2.0/libstdc++-v3/crossconfig.m4.orig
+--- gcc-8.2.0/libstdc++-v3/crossconfig.m4.orig	1970-01-01 01:00:00.000000000 +0100
++++ aplus-gcc-8.2.0/libstdc++-v3/crossconfig.m4.orig	2018-07-04 13:45:51.000000000 +0200
+@@ -0,0 +1,298 @@
++dnl
++dnl This file contains details for non-native builds.
++dnl
++
++AC_DEFUN([GLIBCXX_CROSSCONFIG],[
++# Base decisions on target environment.
++case "${host}" in
++  arm*-*-symbianelf*)
++    # This is a freestanding configuration; there is nothing to do here.
++    ;;
++
++  avr*-*-*)
++    AC_DEFINE(HAVE_ACOSF)
++    AC_DEFINE(HAVE_ASINF)
++    AC_DEFINE(HAVE_ATAN2F)
++    AC_DEFINE(HAVE_ATANF)
++    AC_DEFINE(HAVE_CEILF)
++    AC_DEFINE(HAVE_COSF)
++    AC_DEFINE(HAVE_COSHF)
++    AC_DEFINE(HAVE_EXPF)
++    AC_DEFINE(HAVE_FABSF)
++    AC_DEFINE(HAVE_FLOORF)
++    AC_DEFINE(HAVE_FMODF)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_SQRTF)
++    AC_DEFINE(HAVE_HYPOTF)
++    AC_DEFINE(HAVE_LDEXPF)
++    AC_DEFINE(HAVE_LOG10F)
++    AC_DEFINE(HAVE_LOGF)
++    AC_DEFINE(HAVE_MODFF)
++    AC_DEFINE(HAVE_POWF)
++    AC_DEFINE(HAVE_SINF)
++    AC_DEFINE(HAVE_SINHF)
++    AC_DEFINE(HAVE_TANF)
++    AC_DEFINE(HAVE_TANHF)
++    ;;
++
++  mips*-sde-elf*)
++    # These definitions are for the SDE C library rather than newlib.
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++
++    AC_DEFINE(HAVE_FINITE)
++    AC_DEFINE(HAVE_HYPOT)
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_ISINF)
++
++    AC_DEFINE(HAVE_LDEXPF)
++    AC_DEFINE(HAVE_MODF)
++    AC_DEFINE(HAVE_SQRTF)
++    ;;
++
++  spu-*-elf*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    AM_ICONV
++    ;;
++
++  *-aix*)
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    AC_DEFINE(_GLIBCXX_USE_RANDOM_TR1)
++    # We don't yet support AIX's TLS ABI.
++    #GCC_CHECK_TLS
++    AM_ICONV
++    ;;
++
++  *-darwin*)
++    # Darwin versions vary, but the linker should work in a cross environment,
++    # so we just check for all the features here.
++    # Check for available headers.
++
++    # Don't call GLIBCXX_CHECK_LINKER_FEATURES, Darwin doesn't have a GNU ld
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
++
++  *djgpp)
++    # GLIBCXX_CHECK_MATH_SUPPORT
++    AC_DEFINE(HAVE_ISINF)
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_FINITE)
++    AC_DEFINE(HAVE_SINCOS)
++    AC_DEFINE(HAVE_HYPOT)
++    ;;
++
++  *-freebsd*)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS) 
++    GLIBCXX_CHECK_LINKER_FEATURES
++    AC_DEFINE(HAVE_SETENV)
++    AC_DEFINE(HAVE_FINITEF)
++    AC_DEFINE(HAVE_FINITE)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_HYPOT)
++    AC_DEFINE(HAVE_HYPOTF)
++    AC_DEFINE(HAVE_ISINF)
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_ISNANF)
++
++    AC_DEFINE(HAVE_ACOSF)
++    AC_DEFINE(HAVE_ASINF)
++    AC_DEFINE(HAVE_ATAN2F)
++    AC_DEFINE(HAVE_ATANF)
++    AC_DEFINE(HAVE_CEILF)
++    AC_DEFINE(HAVE_COSF)
++    AC_DEFINE(HAVE_COSHF)
++    AC_DEFINE(HAVE_EXPF)
++    AC_DEFINE(HAVE_FABSF)
++    AC_DEFINE(HAVE_FLOORF)
++    AC_DEFINE(HAVE_FMODF)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_LDEXPF)
++    AC_DEFINE(HAVE_LOG10F)
++    AC_DEFINE(HAVE_LOGF)
++    AC_DEFINE(HAVE_MODFF)
++    AC_DEFINE(HAVE_POWF)
++    AC_DEFINE(HAVE_SINF)
++    AC_DEFINE(HAVE_SINHF)
++    AC_DEFINE(HAVE_SQRTF)
++    AC_DEFINE(HAVE_TANF)
++    AC_DEFINE(HAVE_TANHF)
++    if test x"long_double_math_on_this_cpu" = x"yes"; then
++      AC_DEFINE(HAVE_FINITEL)
++      AC_DEFINE(HAVE_ISINFL)
++      AC_DEFINE(HAVE_ISNANL)
++    fi
++    AC_CHECK_FUNCS(__cxa_thread_atexit)
++    AC_CHECK_FUNCS(aligned_alloc posix_memalign memalign _aligned_malloc)
++    ;;
++
++  *-fuchsia*)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS)
++    ;;
++
++  *-hpux*)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS)
++    GLIBCXX_CHECK_LINKER_FEATURES
++
++    # GLIBCXX_CHECK_MATH_SUPPORT
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_HYPOT)
++    AC_DEFINE(HAVE_ACOSF)
++    AC_DEFINE(HAVE_ASINF)
++    AC_DEFINE(HAVE_ATANF)
++    AC_DEFINE(HAVE_COSF)
++    AC_DEFINE(HAVE_COSHF)
++    AC_DEFINE(HAVE_SINF)
++    AC_DEFINE(HAVE_SINHF)
++    AC_DEFINE(HAVE_TANF)
++    AC_DEFINE(HAVE_TANHF)
++    AC_DEFINE(HAVE_EXPF)
++    AC_DEFINE(HAVE_ATAN2F)
++    AC_DEFINE(HAVE_FABSF)
++    AC_DEFINE(HAVE_FMODF)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_LOGF)
++    AC_DEFINE(HAVE_LOG10F)
++    AC_DEFINE(HAVE_MODF)
++    AC_DEFINE(HAVE_POWF)
++    AC_DEFINE(HAVE_SQRTF)
++
++    # GLIBCXX_CHECK_STDLIB_SUPPORT
++    AC_DEFINE(HAVE_STRTOLD)
++
++    GCC_CHECK_TLS
++    case "$target" in
++      *-hpux10*)
++	AC_DEFINE(HAVE_ISINF)
++	AC_DEFINE(HAVE_ISINFF)
++	AC_DEFINE(HAVE_ISNANF)
++	AC_DEFINE(HAVE_FINITE)
++	AC_DEFINE(HAVE_FINITEF)
++	;;
++    esac
++    ;;
++  *-linux* | *-uclinux* | *-gnu* | *-kfreebsd*-gnu | *-cygwin* | *-solaris*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    AC_DEFINE(_GLIBCXX_USE_RANDOM_TR1)
++    GCC_CHECK_TLS
++    AC_CHECK_FUNCS(__cxa_thread_atexit_impl)
++    AC_CHECK_FUNCS(aligned_alloc posix_memalign memalign _aligned_malloc)
++    AM_ICONV
++    ;;
++  *-mingw32*)
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    AC_CHECK_FUNCS(aligned_alloc posix_memalign memalign _aligned_malloc)
++    ;;
++  *-netbsd*)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS) 
++    GLIBCXX_CHECK_LINKER_FEATURES
++    AC_DEFINE(HAVE_FINITEF)
++    AC_DEFINE(HAVE_FINITE)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_HYPOTF)
++    AC_DEFINE(HAVE_ISINF)
++    AC_DEFINE(HAVE_ISINFF)
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_ISNANF)
++    if test x"long_double_math_on_this_cpu" = x"yes"; then
++      AC_DEFINE(HAVE_FINITEL)
++      AC_DEFINE(HAVE_ISINFL)
++      AC_DEFINE(HAVE_ISNANL)
++    fi
++    AC_CHECK_FUNCS(aligned_alloc posix_memalign memalign _aligned_malloc)
++    ;;
++  *-qnx6.1* | *-qnx6.2*)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    AC_SUBST(SECTION_FLAGS) 
++    GLIBCXX_CHECK_LINKER_FEATURES
++    AC_DEFINE(HAVE_COSF)
++    AC_DEFINE(HAVE_COSL)
++    AC_DEFINE(HAVE_COSHF)
++    AC_DEFINE(HAVE_COSHL)
++    AC_DEFINE(HAVE_LOGF)
++    AC_DEFINE(HAVE_LOGL)
++    AC_DEFINE(HAVE_LOG10F)
++    AC_DEFINE(HAVE_LOG10L)
++    AC_DEFINE(HAVE_SINF)
++    AC_DEFINE(HAVE_SINL)
++    AC_DEFINE(HAVE_SINHF)
++    AC_DEFINE(HAVE_SINHL)
++    ;;
++  *-rtems*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
++  *-tpf)
++    SECTION_FLAGS='-ffunction-sections -fdata-sections'
++    SECTION_LDFLAGS='-Wl,--gc-sections $SECTION_LDFLAGS'
++    AC_SUBST(SECTION_FLAGS)
++    AC_DEFINE(HAVE_FINITE)
++    AC_DEFINE(HAVE_FINITEF)
++    AC_DEFINE(HAVE_FREXPF)
++    AC_DEFINE(HAVE_HYPOTF)
++    AC_DEFINE(HAVE_ISINF)
++    AC_DEFINE(HAVE_ISINFF)
++    AC_DEFINE(HAVE_ISNAN)
++    AC_DEFINE(HAVE_ISNANF)
++    AC_DEFINE(HAVE_SINCOS)
++    AC_DEFINE(HAVE_SINCOSF)
++    if test x"long_double_math_on_this_cpu" = x"yes"; then
++      AC_DEFINE(HAVE_FINITEL)
++      AC_DEFINE(HAVE_HYPOTL)
++      AC_DEFINE(HAVE_ISINFL)
++      AC_DEFINE(HAVE_ISNANL)
++    fi
++    ;;
++  *-*vms*)
++    # Check for available headers.
++    # Don't call GLIBCXX_CHECK_LINKER_FEATURES, VMS doesn't have a GNU ld
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
++    ;;
++  *-vxworks)
++    AC_DEFINE(HAVE_ACOSF)
++    AC_DEFINE(HAVE_ASINF)
++    AC_DEFINE(HAVE_ATAN2F)
++    AC_DEFINE(HAVE_ATANF)
++    AC_DEFINE(HAVE_CEILF)
++    AC_DEFINE(HAVE_COSF)
++    AC_DEFINE(HAVE_COSHF)
++    AC_DEFINE(HAVE_EXPF)
++    AC_DEFINE(HAVE_FABSF)
++    AC_DEFINE(HAVE_FLOORF)
++    AC_DEFINE(HAVE_FMODF)
++    AC_DEFINE(HAVE_HYPOT)
++    AC_DEFINE(HAVE_LOG10F)
++    AC_DEFINE(HAVE_LOGF)
++    AC_DEFINE(HAVE_POWF)
++    AC_DEFINE(HAVE_SINF)
++    AC_DEFINE(HAVE_SINHF)
++    AC_DEFINE(HAVE_SQRTF)
++    AC_DEFINE(HAVE_TANF)
++    AC_DEFINE(HAVE_TANHF)
++    ;;
++  *)
++    AC_MSG_ERROR([No support for this host/target combination.])
++   ;;
++esac
++])
+diff -Naur gcc-8.2.0/libstdc++-v3/libsupc++/new_opa.cc aplus-gcc-8.2.0/libstdc++-v3/libsupc++/new_opa.cc
+--- gcc-8.2.0/libstdc++-v3/libsupc++/new_opa.cc	2018-01-03 11:03:58.000000000 +0100
++++ aplus-gcc-8.2.0/libstdc++-v3/libsupc++/new_opa.cc	2018-11-26 19:35:36.137419138 +0100
+@@ -58,7 +58,7 @@
+ #include <stdint.h>
+ // The C library doesn't provide any aligned allocation functions, define one.
+ // This is a modified version of code from gcc/config/i386/gmm_malloc.h
+-static inline void*
++void*
+ aligned_alloc (std::size_t al, std::size_t sz)
+ {
+   // Alignment must be a power of two.
