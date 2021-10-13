@@ -103,6 +103,8 @@ pushd tmp/src/gcc-$gcc
 
     mkdir -p build
     
+    apt-get remove libmpfr-dev libmpc-dev libgmp-dev libisl-dev
+    
     # Prerequisites
     wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.18.tar.bz2        || exit 1
     wget https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2       || exit 1
