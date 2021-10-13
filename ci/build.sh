@@ -102,6 +102,9 @@ popd
 pushd tmp/src/gcc-$gcc
 
     mkdir -p build
+    
+    # Prerequisites
+    contrib/download_prerequisites                  || exit 1
 
     # Patch
     patch -p1 < $PATCH/gcc-$gcc.patch               || exit 1
