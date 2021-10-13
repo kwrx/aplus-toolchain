@@ -104,7 +104,23 @@ pushd tmp/src/gcc-$gcc
     mkdir -p build
     
     # Prerequisites
-    contrib/download_prerequisites                  || exit 1
+    wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.18.tar.bz2        || exit 1
+    wget https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2       || exit 1
+    wget https://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.6.tar.bz2      || exit 1
+    wget https://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz        || exit 1
+    
+    # Extract
+    tar -xf isl-0.18.tar.bz2                                                || exit 1
+    tar -xf gmp-6.1.0.tar.bz2                                               || exit 1
+    tar -xf mpfr-3.1.6.tar.bz2                                              || exit 1
+    tar -xf mpc-1.0.3.tar.gz                                                || exit 1
+    
+    # Rename
+    mv isl-0.18   isl                                                       || exit 1
+    mv gmp-6.1.0  gmp                                                       || exit 1
+    mv mpfr-3.1.6 mpfr                                                      || exit 1
+    mv mpc-1.0.3  mpc                                                       || exit 1
+    
 
     # Patch
     patch -p1 < $PATCH/gcc-$gcc.patch               || exit 1
