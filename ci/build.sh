@@ -122,7 +122,8 @@ pushd tmp/src/gcc-$gcc
 
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared   || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared \
+                     --with-gmp=../gmp --with-mpc=../mpc --with-isl=../isl --with-mpfr=../mpfr                       || exit 1
         make -j4 all-gcc                                                                                             || exit 1
         make -j4 all-target-libgcc                                                                                   || exit 1
         make -j4 install-gcc                                                                                         || exit 1
