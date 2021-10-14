@@ -1,0 +1,33 @@
+name: deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        
+    - name: Install Dependencies
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: sudo apt update && sudo apt upgrade && sudo apt install -y build-essential gcc g++ automake autoconf texinfo flex bison
+      
+    - name: Build Toolchain
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: ./ci/build.sh x86_64
+      
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          ${{github.workspace}}/*-aplus-toolchain-nocxx.tar.xz
+          ${{github.workspace}}/*-aplus-toolchain.tar.xz
