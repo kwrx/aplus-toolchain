@@ -103,8 +103,6 @@ pushd tmp/src/gcc-$gcc
 
     mkdir -p build
     
-    apt-get remove libmpfr-dev libmpc-dev libgmp-dev libisl-dev
-    
     # Prerequisites
     wget https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.18.tar.bz2        || exit 1
     wget https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2       || exit 1
@@ -140,8 +138,7 @@ pushd tmp/src/gcc-$gcc
 
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared \
-                     --with-gmp=../gmp --with-mpc=../mpc --with-isl=../isl --with-mpfr=../mpfr                       || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared   || exit 1
         make -j4 all-gcc                                                                                             || exit 1
         make -j4 all-target-libgcc                                                                                   || exit 1
         make -j4 install-gcc                                                                                         || exit 1
