@@ -2,9 +2,9 @@
 
 host=$1
 binutils="2.31"
-gcc="8.5.0"
+gcc="12.2.0"
 autoconf="2.69"
-autoconf_gcc="2.64"
+autoconf_gcc="2.69"
 automake="1.15.1"
 
 
