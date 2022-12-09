@@ -46,8 +46,8 @@ pushd tmp/src/autoconf-$autoconf
 
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j4                                    || exit 1
-        make -j4 install                            || exit 1
+        make -j$(nproc)                             || exit 1
+        make -j$(nproc) install                     || exit 1
     popd
 
 popd
@@ -59,8 +59,8 @@ pushd tmp/src/automake-$automake
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j4                                    || exit 1
-        make -j4 install                            || exit 1
+        make -j$(nproc)                             || exit 1
+        make -j$(nproc) install                     || exit 1
     popd
 
 popd
@@ -78,9 +78,14 @@ pushd tmp/src/binutils-$binutils
     popd
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-lto --disable-host-shared   || exit 1
-        make -j4                                                                            || exit 1
-        make -j4 install                                                                    || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET      \
+            --enable-lto                                    \
+            --enable-threads=posix                          \
+            --enable-host-shared                            \
+            --disable-shared                                \
+            --disable-nls                                   || exit 1
+        make -j$(nproc)                                     || exit 1
+        make -j$(nproc) install                             || exit 1
     popd
 
 popd
@@ -92,8 +97,8 @@ pushd tmp/src/autoconf-$autoconf_gcc
     
     pushd build
         ../configure --prefix=$TEMP                 || exit 1
-        make -j4                                    || exit 1
-        make -j4 install                            || exit 1
+        make -j$(nproc)                             || exit 1
+        make -j$(nproc) install                     || exit 1
     popd    
 
 popd
@@ -138,15 +143,32 @@ pushd tmp/src/gcc-$gcc
 
 
     pushd build
-        ../configure --prefix=$PREFIX --target=$TARGET --enable-languages=c,c++ --enable-lto --disable-host-shared   || exit 1
-        make -j4 all-gcc                                                                                             || exit 1
-        make -j4 all-target-libgcc                                                                                   || exit 1
-        make -j4 install-gcc                                                                                         || exit 1
-        make -j4 install-target-libgcc                                                                               || exit 1
+        ../configure --prefix=$PREFIX --target=$TARGET              \
+            --enable-languages=c,c++                                \
+            --enable-threads=posix                                  \
+            --enable-lto                                            \
+            --enable-host-shared                                    \
+            --disable-shared                                        \
+            --disable-nls                                           || exit 1
+        make -j$(nproc) all-gcc                                     || exit 1
+        make -j$(nproc) install-gcc                                 || exit 1
     popd
 
 popd
 
+
+# C Library
+wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TARGET-musl.tar.xz     || exit 1
+tar -xJf tmp/src/$TARGET-musl.tar.xz -C $PREFIX                                                     || exit 1
+
+
+# Libgcc
+pushd tmp/src/gcc-$gcc
+    pushd build
+        make -j$(nproc) all-target-libgcc                           || exit 1
+        make -j$(nproc) install-target-libgcc                       || exit 1
+    popd
+popd
 
 
 # Strip binaries
@@ -162,9 +184,9 @@ pushd $PREFIX/libexec/gcc/$TARGET/$gcc
     strip cc1 cc1plus collect2 lto-wrapper lto1
 popd
 
+
 # Pack Release
 pushd toolchain
-    rm -rf $PREFIX/$TARGET/include/*
     tar -cJf $TARGET-toolchain-nocxx.tar.xz *
 popd
 
@@ -172,17 +194,16 @@ mv toolchain/$TARGET-toolchain-nocxx.tar.xz .
 
 
 
-# Install musl
-wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TARGET-musl.tar.xz     || exit 1
-tar -xJf tmp/src/$TARGET-musl.tar.xz -C $PREFIX                                                     || exit 1
+
 
 # Libstdc++-v3
 pushd tmp/src/gcc-$gcc
     pushd build
-        make -j4 all-target-libstdc++-v3                                                            || exit 1
-        make -j4 install-target-libstdc++-v3                                                        || exit 1
+        make -j$(nproc) all-target-libstdc++-v3                                                     || exit 1
+        make -j$(nproc) install-target-libstdc++-v3                                                 || exit 1
     popd
 popd
+
 
 # Pack Release
 pushd toolchain

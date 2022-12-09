@@ -44,7 +44,7 @@ diff -Naur gcc-12.2.0/gcc/config/aplus.h aplus-gcc-12.2.0/gcc/config/aplus.h
 +#define LIB_SPEC                "-lc -lm -lgcc"
 +#define STARTFILE_SPEC          "crt0.o%s crti.o%s crtbegin.o%s"
 +#define ENDFILE_SPEC            "crtend.o%s crtn.o%s"
-+
++#define LINK_SPEC               "-z max-page-size=4096 %{shared:-shared} %{static:-static} %{!static: %{!shared: %{rdynamic:-export-dynamic}} -dynamic-linker /lib/ld-musl-x86-64.so.1}"
 +#undef SYSTEM_IMPLICIT_EXTERN_C
 +#define SYSTEM_IMPLICIT_EXTERN_C    1
 +
@@ -67,7 +67,7 @@ diff -Naur gcc-12.2.0/gcc/config/i386/aplus64 aplus-gcc-12.2.0/gcc/config/i386/a
 diff -Naur gcc-12.2.0/gcc/config.gcc aplus-gcc-12.2.0/gcc/config.gcc
 --- gcc-12.2.0/gcc/config.gcc	2022-08-19 10:09:52.552662114 +0200
 +++ aplus-gcc-12.2.0/gcc/config.gcc	2022-09-05 22:25:19.113145452 +0200
-@@ -673,6 +673,12 @@
+@@ -673,6 +673,13 @@
  
  # Common parts for widely ported systems.
  case ${target} in
@@ -76,6 +76,7 @@ diff -Naur gcc-12.2.0/gcc/config.gcc aplus-gcc-12.2.0/gcc/config.gcc
 +  gnu_ld=yes
 +  default_use_cxa_atexit=yes
 +  use_gcc_stdint=provide
++  thread_file='posix'
 +  ;;
  *-*-darwin*)
    tmake_file="t-darwin "
