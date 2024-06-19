@@ -1,0 +1,34 @@
+name: build-x86_64-aplus-gcc-linux-aarch64
+
+on:
+  push:
+    tags:
+      - "v*"
+    
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        
+    - name: Install Dependencies
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: sudo apt update && sudo apt install -y --no-install-recommends build-essential gcc g++ automake autoconf texinfo flex bison gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+      
+    - name: Build Toolchain
+      working-directory: ${{github.workspace}}
+      shell: bash
+      run: ./ci/build.sh x86_64-aplus aarch64-linux-gnu
+      
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          ${{github.workspace}}/*-aplus-toolchain-nocxx-*.tar.xz
+          ${{github.workspace}}/*-aplus-toolchain-*.tar.xz
