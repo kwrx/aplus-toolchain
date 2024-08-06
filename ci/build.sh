@@ -27,13 +27,6 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-# Set variables
-TARGET=$1
-HOST=$2
-PATCH=$(pwd)/patch
-PREFIX=$(pwd)/toolchain
-TEMP=$(pwd)/tmp
-
 # Check required tools
 required wget
 required tar
@@ -45,9 +38,17 @@ required gcc
 required g++
 required strip
 required nproc
-required $HOST-gcc
-required $HOST-g++
-required $HOST-strip
+required $2-gcc
+required $2-g++
+required $2-strip
+
+# Set variables
+TOOLCHAIN_TARGET=$1
+TOOLCHAIN_HOST=$2
+TOOLCHAIN_BUILD=$(gcc -dumpmachine)
+PATCH=$(pwd)/patch
+PREFIX=$(pwd)/toolchain
+TEMP=$(pwd)/tmp
 
 # Create directories
 mkdir -p toolchain
@@ -111,7 +112,7 @@ pushd tmp/src/binutils-$binutils
     popd
 
     pushd build
-        die ../configure --prefix=$PREFIX --target=$TARGET --host=$HOST \
+        die ../configure --prefix=$PREFIX --target=$TOOLCHAIN_TARGET --host=$TOOLCHAIN_HOST --build=$TOOLCHAIN_BUILD \
             --enable-lto                                                \
             --enable-threads=posix                                      \
             --enable-host-shared                                        \
@@ -129,9 +130,9 @@ pushd tmp/src/autoconf-$autoconf_gcc
     mkdir -p build
 
     pushd build
-        ../configure --prefix=$TEMP || exit 1
-        make -j$(nproc) || exit 1
-        make -j$(nproc) install || exit 1
+        die ../configure --prefix=$TEMP
+        die make -j$(nproc)
+        die make -j$(nproc) install
     popd
 
 popd
@@ -166,14 +167,14 @@ pushd tmp/src/gcc-$gcc
         die autoconf
     popd
 
-    mkdir -p $PREFIX/$TARGET/include
+    mkdir -p $PREFIX/$TOOLCHAIN_TARGET/include
 
-    pushd $PREFIX/$TARGET/include
+    pushd $PREFIX/$TOOLCHAIN_TARGET/include
         die patch -p1 <$PATCH/gcc-headers.patch
     popd
 
     pushd build
-        die ../configure --prefix=$PREFIX --target=$TARGET --host=$HOST \
+        die ../configure --prefix=$PREFIX --target=$TOOLCHAIN_TARGET --host=$TOOLCHAIN_HOST --build=$TOOLCHAIN_BUILD \
             --enable-languages=c,c++                                    \
             --enable-threads=posix                                      \
             --enable-lto                                                \
@@ -187,8 +188,8 @@ pushd tmp/src/gcc-$gcc
 popd
 
 # C Library
-die wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TARGET-musl.tar.xz
-die tar -xJf tmp/src/$TARGET-musl.tar.xz -C $PREFIX
+die wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TOOLCHAIN_TARGET-musl.tar.xz
+die tar -xJf tmp/src/$TOOLCHAIN_TARGET-musl.tar.xz -C $PREFIX
 
 # Libgcc
 pushd tmp/src/gcc-$gcc
@@ -200,23 +201,23 @@ popd
 
 # Strip binaries
 pushd $PREFIX/bin
-    die $HOST-strip *
+    die $TOOLCHAIN_HOST-strip *
 popd
 
-pushd $PREFIX/$TARGET/bin
-    die $HOST-strip *
+pushd $PREFIX/$TOOLCHAIN_TARGET/bin
+    die $TOOLCHAIN_HOST-strip *
 popd
 
-pushd $PREFIX/libexec/gcc/$TARGET/$gcc
-    die $HOST-strip cc1 cc1plus collect2 lto-wrapper lto1
+pushd $PREFIX/libexec/gcc/$TOOLCHAIN_TARGET/$gcc
+    die $TOOLCHAIN_HOST-strip cc1 cc1plus collect2 lto-wrapper lto1
 popd
 
 # Pack Release
 pushd toolchain
-    die tar -cJf $TARGET-toolchain-nocxx-$HOST.tar.xz *
+    die tar -cJf $TOOLCHAIN_TARGET-toolchain-nocxx-$TOOLCHAIN_HOST.tar.xz *
 popd
 
-mv toolchain/$TARGET-toolchain-nocxx-$HOST.tar.xz .
+mv toolchain/$TOOLCHAIN_TARGET-toolchain-nocxx-$TOOLCHAIN_HOST.tar.xz .
 
 # Libstdc++-v3
 pushd tmp/src/gcc-$gcc
@@ -228,10 +229,10 @@ popd
 
 # Pack Release
 pushd toolchain
-    die tar -cJf $TARGET-toolchain-$HOST.tar.xz *
+    die tar -cJf $TOOLCHAIN_TARGET-toolchain-$TOOLCHAIN_HOST.tar.xz *
 popd
 
-mv toolchain/$TARGET-toolchain-$HOST.tar.xz .
+mv toolchain/$TOOLCHAIN_TARGET-toolchain-$TOOLCHAIN_HOST.tar.xz .
 
 # Clean
 rm -rf $TEMP
