@@ -3,7 +3,7 @@ name: build-x86_64-aplus-gcc-linux-amd64
 on:
   push:
     tags:
-      - "v*"
+      - "*.*.*"
 
 jobs:
   build:
