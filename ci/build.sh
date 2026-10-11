@@ -5,6 +5,7 @@ gcc="12.2.0"
 autoconf="2.69"
 autoconf_gcc="2.69"
 automake="1.15.1"
+aplus_musl="0.2.1"
 
 function required {
     echo -n "Checking for $1..."
@@ -188,7 +189,7 @@ pushd tmp/src/gcc-$gcc
 popd
 
 # C Library
-die wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/latest/download/$TOOLCHAIN_TARGET-musl.tar.xz
+die wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/download/$aplus_musl/$TOOLCHAIN_TARGET-musl.tar.xz
 die tar -xJf tmp/src/$TOOLCHAIN_TARGET-musl.tar.xz -C $PREFIX
 
 # Libgcc
