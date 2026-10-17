@@ -189,6 +189,8 @@ pushd tmp/src/gcc-$gcc
     popd
 
     pushd build
+        CFLAGS="-g -O2 -std=gnu17" CXXFLAGS="-g -O2 -std=gnu++11"                                  \
+        CFLAGS_FOR_BUILD="-g -O2 -std=gnu17" CXXFLAGS_FOR_BUILD="-g -O2 -std=gnu++11"              \
         die ../configure --prefix=$PREFIX --target=$TOOLCHAIN_TARGET --host=$TOOLCHAIN_HOST --build=$TOOLCHAIN_BUILD \
             --enable-languages=c,c++                                    \
             --enable-threads=posix                                      \
