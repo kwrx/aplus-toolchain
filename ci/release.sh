@@ -5,7 +5,6 @@ gcc="12.2.0"
 autoconf="2.69"
 autoconf_gcc="2.69"
 automake="1.15.1"
-aplus_musl="0.2.1"
 
 function required {
     echo -n "Checking for $1..."
@@ -28,6 +27,9 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
+# Move to repository root
+cd "$(dirname "$0")/.." || exit 1
+
 # Check required tools
 required wget
 required tar
@@ -39,9 +41,18 @@ required gcc
 required g++
 required strip
 required nproc
+required git
 required $2-gcc
 required $2-g++
-required $2-strip
+
+# Select host strip
+if [ "$($2-gcc -dumpmachine)" = "$(gcc -dumpmachine)" ]; then
+    TOOLCHAIN_STRIP=strip
+else
+    TOOLCHAIN_STRIP=$2-strip
+fi
+
+required $TOOLCHAIN_STRIP
 
 # Set variables
 TOOLCHAIN_TARGET=$1
@@ -50,6 +61,12 @@ TOOLCHAIN_BUILD=$(gcc -dumpmachine)
 PATCH=$(pwd)/patch
 PREFIX=$(pwd)/toolchain
 TEMP=$(pwd)/tmp
+
+# Clean temporary and build files on exit
+trap 'rm -rf "$TEMP" "$PREFIX"' EXIT
+
+# Set paths
+export PATH="$PREFIX/bin:$TEMP/bin:$PATH"
 
 # Create directories
 mkdir -p toolchain
@@ -69,9 +86,6 @@ die tar -xJf tmp/src/autoconf-$autoconf_gcc.tar.xz -C tmp/src
 die tar -xJf tmp/src/automake-$automake.tar.xz -C tmp/src
 die tar -xJf tmp/src/binutils-$binutils.tar.xz -C tmp/src
 die tar -xJf tmp/src/gcc-$gcc.tar.xz -C tmp/src
-
-# Set paths
-export PATH="$PREFIX/bin:$TEMP/bin:$PATH"
 
 
 # Autoconf
@@ -189,8 +203,20 @@ pushd tmp/src/gcc-$gcc
 popd
 
 # C Library
-die wget -P tmp/src https://github.com/kwrx/aplus-musl/releases/download/$aplus_musl/$TOOLCHAIN_TARGET-musl.tar.xz
-die tar -xJf tmp/src/$TOOLCHAIN_TARGET-musl.tar.xz -C $PREFIX
+die git clone --depth 1 https://github.com/kwrx/aplus-musl tmp/src/aplus-musl
+pushd tmp/src/aplus-musl
+    mkdir -p build
+    pushd build
+        die ../configure --prefix= --host=$TOOLCHAIN_TARGET --disable-shared --enable-static
+        die make -j$(nproc)
+        die make -j$(nproc) DESTDIR=$PREFIX/$TOOLCHAIN_TARGET install
+    popd
+    for ldso in $PREFIX/$TOOLCHAIN_TARGET/lib/ld-musl-*.so.1; do
+        if [ -L $ldso ]; then
+            die ln -sfn libc.so $ldso
+        fi
+    done
+popd
 
 # Libgcc
 pushd tmp/src/gcc-$gcc
@@ -202,15 +228,15 @@ popd
 
 # Strip binaries
 pushd $PREFIX/bin
-    die $TOOLCHAIN_HOST-strip *
+    die $TOOLCHAIN_STRIP *
 popd
 
 pushd $PREFIX/$TOOLCHAIN_TARGET/bin
-    die $TOOLCHAIN_HOST-strip *
+    die $TOOLCHAIN_STRIP *
 popd
 
 pushd $PREFIX/libexec/gcc/$TOOLCHAIN_TARGET/$gcc
-    die $TOOLCHAIN_HOST-strip cc1 cc1plus collect2 lto-wrapper lto1
+    die $TOOLCHAIN_STRIP cc1 cc1plus collect2 lto-wrapper lto1
 popd
 
 # Pack Release
@@ -235,5 +261,3 @@ popd
 
 mv toolchain/$TOOLCHAIN_TARGET-toolchain-$TOOLCHAIN_HOST.tar.xz .
 
-# Clean
-rm -rf $TEMP

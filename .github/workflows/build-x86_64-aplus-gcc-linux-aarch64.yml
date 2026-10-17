@@ -23,7 +23,7 @@ jobs:
     - name: Build Toolchain
       working-directory: ${{github.workspace}}
       shell: bash
-      run: ./ci/build.sh x86_64-aplus aarch64-linux-gnu
+      run: ./ci/release.sh x86_64-aplus aarch64-linux-gnu
       
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
