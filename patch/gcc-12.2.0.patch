@@ -44,7 +44,7 @@ diff -Naur gcc-12.2.0/gcc/config/aplus.h aplus-gcc-12.2.0/gcc/config/aplus.h
 +#define LIB_SPEC                "-lc -lm -lgcc"
 +#define STARTFILE_SPEC          "crt0.o%s crti.o%s crtbegin.o%s"
 +#define ENDFILE_SPEC            "crtend.o%s crtn.o%s"
-+#define LINK_SPEC               "-z max-page-size=4096 %{shared:-shared} %{static:-static} %{!static: %{!shared: %{rdynamic:-export-dynamic}} -dynamic-linker /lib/ld-musl-x86-64.so.1}"
++#define LINK_SPEC               "-z max-page-size=4096 %{shared:-shared} %{static:-static} %{!static: %{!shared: %{rdynamic:-export-dynamic}} -dynamic-linker /lib/ld-musl-x86_64.so.1}"
 +#undef SYSTEM_IMPLICIT_EXTERN_C
 +#define SYSTEM_IMPLICIT_EXTERN_C    1
 +
