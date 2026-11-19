@@ -2,5 +2,4 @@
 [![build-x86_64-aplus-gcc-linux-amd64](https://github.com/kwrx/aplus-toolchain/actions/workflows/build-x86_64-aplus-gcc-linux-amd64.yml/badge.svg)](https://github.com/kwrx/aplus-toolchain/actions/workflows/build-x86_64-aplus-gcc-linux-amd64.yml)
 
 # aplus-toolchain 
-Toolchain (binutils, gcc) for aplus
-
+Toolchain for aplus: binutils 2.31, gcc 12.2.0 (libgcc, libatomic, libstdc++) and the [aplus-musl](https://github.com/kwrx/aplus-musl) C library.
