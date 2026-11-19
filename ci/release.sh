@@ -225,6 +225,8 @@ pushd tmp/src/gcc-$gcc
     pushd build
         die make -j$(nproc) all-target-libgcc
         die make -j$(nproc) install-target-libgcc
+        die make -j$(nproc) all-target-libatomic
+        die make -j$(nproc) install-target-libatomic
     popd
 popd
 
